@@ -20,7 +20,26 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// developmentOnly: 해당 라이브러리는 개발 환경에만 적용된다는 의미로, 운영 환경에 배포되는 jar, war 파일에는 이 라이브러리가 포함되지 않는다.
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	// 컴파일할 때 롬복 라이브러리 적용
+	compileOnly 'org.projectlombok:lombok' 
+    annotationProcessor 'org.projectlombok:lombok'
+    // H2 데이터베이스 설치
+    runtimeOnly 'com.h2database:h2'
+    // JPA 환경 설정
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // JUnit 설치
+	testImplementation 'org.junit.jupiter:junit-jupiter' 
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // 타임리프 사용
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    // validation 사용
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // security 사용
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 }
 
 tasks.named('test') {
