@@ -40,6 +40,8 @@ dependencies {
     // security 사용
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    // 마크다운 사용
+    implementation 'org.commonmark:commonmark:0.22.0'
 }
 
 tasks.named('test') {

@@ -4,7 +4,9 @@
     <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
+			<!-- 마크다운 -->
+            <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
+			<!-- 마크다운 -->
             <div class="d-flex justify-content-end">
 				<div th:if="${question.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
 	                <div class="mb-2">modified at</div>
@@ -17,8 +19,13 @@
                     <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
                 </div>
             </div>
-			<!-- 질문 수정, 삭제 -->
+			<!-- 질문 수정, 삭제, 추천 -->
 			<div class="my-3">
+				<a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+	                th:data-uri="@{|/question/vote/${question.id}|}">
+	                추천
+	                <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span>
+	            </a>
 	            <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
 	                sec:authorize="isAuthenticated()"
 	                th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
@@ -28,7 +35,7 @@
 				                th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
 				                th:text="삭제"></a>
 	        </div>
-			<!-- 질문 수정, 삭제 -->
+			<!-- 질문 수정, 삭제, 추천 -->
         </div>
     </div>
     <!-- 답변의 갯수 표시 -->
@@ -36,8 +43,11 @@
         th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
     <!-- 답변 반복 시작 -->
     <div class="card my-3" th:each="answer : ${question.answerList}">
+		<a th:id="|answer_${answer.id}|"></a>
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
+			<!-- 마크다운 -->
+            <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
+			<!-- 마크다운 -->
             <div class="d-flex justify-content-end">
 				<div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
 	                <div class="mb-2">modified at</div>
@@ -50,7 +60,13 @@
                     <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
                 </div>
             </div>
+			<!-- 답변 수정, 삭제, 추천 -->
 			<div class="my-3">
+				<a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+	                th:data-uri="@{|/answer/vote/${answer.id}|}">
+	                추천
+	                <span class="badge rounded-pill bg-success" th:text="${#lists.size(answer.voter)}"></span>
+	            </a>
 	            <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
 	                sec:authorize="isAuthenticated()"
 	                th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
@@ -60,6 +76,7 @@
 	                th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
 	                th:text="삭제"></a>
 	        </div>
+			<!-- 답변 수정, 삭제, 추천 -->
         </div>
     </div>
     <!-- 답변 반복 끝  -->
@@ -76,6 +93,14 @@ const delete_elements = document.getElementsByClassName("delete");
 Array.from(delete_elements).forEach(function(element) {
     element.addEventListener('click', function() {
         if(confirm("삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+const recommend_elements = document.getElementsByClassName("recommend");
+Array.from(recommend_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("추천하시겠습니까?")) {
             location.href = this.dataset.uri;
         };
     });
