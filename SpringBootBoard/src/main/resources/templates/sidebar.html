@@ -1,0 +1,7 @@
+<nav th:fragment="sidebarFragment">
+  <ul class="list-group">
+	<li class="list-group-item" th:each="category, loop : ${category_list}">
+		<a class="nav-link" th:href="|/category/${category.id}|" th:text="${category.name}"></a>
+	</li>
+  </ul>
+</nav>
