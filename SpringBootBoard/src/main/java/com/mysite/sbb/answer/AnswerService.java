@@ -1,14 +1,25 @@
 package com.mysite.sbb.answer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -54,5 +65,48 @@ public class AnswerService {
     public void vote(Answer answer, SiteUser siteUser) {
         answer.getVoter().add(siteUser);
         this.answerRepository.save(answer);
+    }
+    
+    // 목록 조회(페이징)
+    public Page<Answer> getAnswerList(Question question, int page, String answerSort) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        if ("recommend".equals(answerSort)) {
+            sorts.add(Sort.Order.desc("voter"));
+        }
+        else {
+            sorts.add(Sort.Order.desc("createDate"));
+        }
+        Pageable pageable = PageRequest.of(page, 5, Sort.by(sorts));
+        return this.answerRepository.findByQuestion(question, pageable);
+    }
+    
+    // 내정보 답변 페이징
+    public Page<Answer> getListByAuthor(int page, SiteUser siteUser) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 3, Sort.by(sorts));
+        return this.answerRepository.findByAuthor(siteUser, pageable);
+    }
+    
+    // 추천한 글 체크
+    public Specification<Answer> hasVoter(SiteUser siteUser) {
+        return new Specification<Answer>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Predicate toPredicate(Root<Answer> a, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                query.distinct(true);
+                return cb.isMember(siteUser, a.get("voter"));
+            }
+        };
+    }
+    
+    // 추천한 답변 조회
+    public Page<Answer> getListByVoter(int page, SiteUser siteUser) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 3, Sort.by(sorts));
+        Specification<Answer> spec = this.hasVoter(siteUser);
+        return this.answerRepository.findAll(spec, pageable);
     }
 }

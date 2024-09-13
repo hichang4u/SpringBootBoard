@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.category.Category;
 import com.mysite.sbb.user.SiteUser;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -66,27 +67,33 @@ public class QuestionService {
     public Question getQuestion(Integer id) {  
         Optional<Question> question = this.questionRepository.findById(id);
         if (question.isPresent()) {
-            return question.get();
+        	// 조회수 1 증가
+        	Question question_views = question.get();
+        	question_views.setViews(question_views.getViews() + 1);
+            this.questionRepository.save(question_views);
+            return question_views;
         } else {
             throw new DataNotFoundException("question not found");
         }
     }
     
     // 저장
-    public void create(String subject, String content, SiteUser user) {
+    public void create(String subject, String content, SiteUser user, Category category) {
         Question q = new Question();
         q.setSubject(subject);
         q.setContent(content);
         q.setCreateDate(LocalDateTime.now());
         q.setAuthor(user);
+        q.setCategory(category);
         this.questionRepository.save(q);
     }
     
     // 수정
-    public void modify(Question question, String subject, String content) {
+    public void modify(Question question, String subject, String content, Category category) {
         question.setSubject(subject);
         question.setContent(content);
         question.setModifyDate(LocalDateTime.now());
+        question.setCategory(category);
         this.questionRepository.save(question);
     }
     
@@ -99,5 +106,43 @@ public class QuestionService {
     public void vote(Question question, SiteUser siteUser) {
         question.getVoter().add(siteUser);
         this.questionRepository.save(question);
+    }
+    
+    // 내정보 질문 페이징
+    public Page<Question> getListByAuthor(int page, SiteUser siteUser) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 5, Sort.by(sorts));
+        return this.questionRepository.findByAuthor(siteUser, pageable);
+    }
+    
+    // 추천한 글은 기존에 Set로 정의한 voter에서 특정 SiteUser가 그 Set에 존재하는지 확인
+    public Specification<Question> hasVoter(SiteUser siteUser) {
+        return new Specification<Question>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Predicate toPredicate(Root<Question> q, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                query.distinct(true);
+                return cb.isMember(siteUser, q.get("voter"));
+            }
+        };
+    }
+    
+    // 추천한 질문 조회
+    public Page<Question> getListByVoter(int page, SiteUser siteUser) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 5, Sort.by(sorts));
+        Specification<Question> spec = this.hasVoter(siteUser);
+        return this.questionRepository.findAll(spec, pageable);
+    }
+    
+    // 카테고리별 질문 목록 조회
+    public Page<Question> getCategoryQuestionList(Category category, int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+        return this.questionRepository.findByCategory(category, pageable);
     }
 }

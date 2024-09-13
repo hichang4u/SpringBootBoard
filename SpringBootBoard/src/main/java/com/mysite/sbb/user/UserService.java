@@ -33,4 +33,26 @@ public class UserService {
             throw new DataNotFoundException("siteuser not found");
         }
     }
+    
+    // 새 비밀번호 저장
+    public SiteUser update(SiteUser user, String newPassword) {
+        user.setPassword(this.passwordEncoder.encode(newPassword));
+        this.userRepository.save(user);
+        return user;
+    }
+
+    // 기존 비밀번호 확인
+    public boolean isMatch(String rawPassword, String encodedPassword) {
+        return this.passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+    
+    // 이메일 확인
+    public SiteUser getUserByEmail(String email) {
+        Optional<SiteUser> siteUser = this.userRepository.findByEmail(email);
+        if (siteUser.isPresent()) {
+            return siteUser.get();
+        } else {
+            throw new DataNotFoundException("Email not found!!");
+        }
+    }
 }

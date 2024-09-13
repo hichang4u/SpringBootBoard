@@ -1,6 +1,7 @@
 package com.mysite.sbb.question;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.answer.AnswerForm;
+import com.mysite.sbb.answer.AnswerService;
+import com.mysite.sbb.category.Category;
+import com.mysite.sbb.category.CategoryService;
+import com.mysite.sbb.comment.Comment;
+import com.mysite.sbb.comment.CommentForm;
+import com.mysite.sbb.comment.CommentService;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
 
@@ -28,30 +36,47 @@ import lombok.RequiredArgsConstructor;
 public class QuestionController {
 
 	private final QuestionService questionService;
+	private final AnswerService answerService;
 	private final UserService userService;
+	private final CommentService commentService;
+	private final CategoryService categoryService;
 
 	@GetMapping("/list")
     public String list(Model model
     				 , @RequestParam(value="page", defaultValue="0") int page
     				 , @RequestParam(value = "kw", defaultValue = "") String kw) {
-        Page<Question> paging = this.questionService.getList(page, kw);
+        Page<Question> paging = this.questionService.getList(page, kw);        
         model.addAttribute("paging", paging);
         model.addAttribute("kw", kw);
+        List<Category> categoryList = this.categoryService.getAll();
+        model.addAttribute("category_list", categoryList);
         return "question/list";
     }
     
     @GetMapping(value = "/detail/{id}")
     public String detail(Model model
     				   , @PathVariable("id") Integer id
-    				   , AnswerForm answerForm) {
+    				   , AnswerForm answerForm
+    				   , CommentForm commentForm
+    				   , @RequestParam(value="answerPage", defaultValue="0") int answerPage
+    				   , @RequestParam(value="answerSort", defaultValue="time") String answerSort) {
     	Question question = this.questionService.getQuestion(id);
         model.addAttribute("question", question);
+        Page<Answer> answerPaging = this.answerService.getAnswerList(question, answerPage, answerSort);
+        model.addAttribute("answerPage", answerPaging);
+        List<Comment> commentList = this.commentService.getCommentList(question);
+        model.addAttribute("comment_list", commentList);
+        List<Category> categoryList = this.categoryService.getAll();
+        model.addAttribute("category_list", categoryList);
         return "question/detail";
     }
     
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
-    public String questionCreate(QuestionForm questionForm) {
+    public String questionCreate(QuestionForm questionForm
+    						   , Model model) {
+    	List<Category> categoryList = this.categoryService.getAll();
+        model.addAttribute("category_list", categoryList);
         return "question/form";
     }
     
@@ -64,19 +89,26 @@ public class QuestionController {
             return "question/form";
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
-        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser);
+        Category category = this.categoryService.getCategoryById(questionForm.getCategory());
+        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser, category);
         return "redirect:/question/list";
     }
     
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
-    public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
+    public String questionModify(QuestionForm questionForm
+    						   , @PathVariable("id") Integer id
+    						   , Principal principal
+    						   , Model model) {
         Question question = this.questionService.getQuestion(id);
         if(!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         questionForm.setSubject(question.getSubject());
         questionForm.setContent(question.getContent());
+        questionForm.setCategory(question.getCategory().getId().intValue());
+        List<Category> categoryList = this.categoryService.getAll();
+        model.addAttribute("category_list", categoryList);
         return "question/form";
     }
     
@@ -93,7 +125,8 @@ public class QuestionController {
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
-        this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
+        Category category = this.categoryService.getCategoryById(questionForm.getCategory());
+        this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent(), category);
         return String.format("redirect:/question/detail/%s", id);
     }
     

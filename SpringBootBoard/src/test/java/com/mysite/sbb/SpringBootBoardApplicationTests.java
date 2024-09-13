@@ -4,21 +4,38 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.answer.AnswerService;
+import com.mysite.sbb.category.CategoryService;
+import com.mysite.sbb.comment.CommentService;
+import com.mysite.sbb.question.Question;
 import com.mysite.sbb.question.QuestionService;
+import com.mysite.sbb.user.SiteUser;
+import com.mysite.sbb.user.UserService;
 
 @SpringBootTest
 class SpringBootBoardApplicationTests {
 
 	@Autowired
-    private QuestionService questionService;
+	private QuestionService questionService;
+
+	@Autowired
+	private AnswerService answerService;
+
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+    private CommentService commentService;
+	
+	@Autowired
+    private CategoryService categoryService;
 
 	@Test
-    void testJpa() {
-		for (int i = 1; i <= 300; i++) {
-            String subject = String.format("제목:테스트 데이터입니다:[%03d]", i);
-            String content = "내용:무[%03d]";
-            this.questionService.create(subject, content, null);
-        }
-    }
+	void testJpa() {		
+		this.categoryService.create("질문과답변");
+		this.categoryService.create("자유게시판");
+		this.categoryService.create("버그및건의");
+	}
 
 }
