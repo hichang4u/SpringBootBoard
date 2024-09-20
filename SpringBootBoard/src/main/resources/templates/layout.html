@@ -4,6 +4,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<!-- 마크다운 CSS -->
+	<link rel="stylesheet" type="text/css" th:href="@{/css/simplemde.min.css}">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
     <!-- sbb CSS -->
@@ -16,6 +18,8 @@
 	<!-- 기본 템플릿 안에 삽입될 내용 Start -->
     <th:block layout:fragment="content"></th:block>
     <!-- 기본 템플릿 안에 삽입될 내용 End -->
+	<!-- 마크다운 JS -->
+	<script th:src="@{/js/simplemde.min.js}"></script>
 	<!-- Bootstrap JS -->
 	<script th:src="@{/js/bootstrap.min.js}"></script>
 	<!-- 자바스크립트 Start -->
