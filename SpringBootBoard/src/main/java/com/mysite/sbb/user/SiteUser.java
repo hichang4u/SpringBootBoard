@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,4 +25,16 @@ public class SiteUser {
 
     @Column(unique = true)
     private String email;
+    
+    private String registerId;
+    
+    @Builder
+    public SiteUser() {
+    }
+    
+    @Builder
+    public SiteUser(String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
 }

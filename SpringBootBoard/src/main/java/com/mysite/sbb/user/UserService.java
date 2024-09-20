@@ -25,6 +25,20 @@ public class UserService {
         return user;
     }
     
+    // overloading
+    public SiteUser create(String registrationId
+    					 , String userName
+    					 , String email
+    					 , String password) {
+	    SiteUser user = new SiteUser();
+	    user.setUsername(userName);
+	    user.setEmail(email);
+	    user.setPassword(password);
+	    user.setRegisterId(registrationId);
+	    this.userRepository.save(user);
+	    return user;
+	}
+    
     public SiteUser getUser(String username) {
         Optional<SiteUser> siteUser = this.userRepository.findByusername(username);
         if (siteUser.isPresent()) {
@@ -53,6 +67,16 @@ public class UserService {
             return siteUser.get();
         } else {
             throw new DataNotFoundException("Email not found!!");
+        }
+    }
+    
+    // 소셜 로그인
+    public SiteUser socialLogin(String registrationId, String username, String email) {
+        Optional<SiteUser> user = this.userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            return this.create(registrationId, username, email, "");
         }
     }
 }
