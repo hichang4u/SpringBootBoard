@@ -2,6 +2,7 @@ package com.mysite.sbb.comment;
 
 import java.time.LocalDateTime;
 
+import com.mysite.sbb.BaseTimeEntity;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
@@ -18,15 +19,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Comment {
+public class Comment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    private LocalDateTime createDate;
 
     @ManyToOne
     private Question question;

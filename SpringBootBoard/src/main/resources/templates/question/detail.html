@@ -2,13 +2,26 @@
 <div layout:fragment="content" class="container my-3">
     <!-- 질문 -->
     <div class="card my-3">
-		<h2 class="card-header bg-info text-white border-bottom p-3" th:text="${question.subject}"></h2>
+		<h2 class="card-header bg-info text-white border-bottom p-3">[[${question.subject}]]</h2>
 		<a th:if="${question.category != null}" th:href="@{|/category/${question.getCategory().getId()}|}"
 		       class="card-header card-link bg-white" style="color: gray" th:text="${question.getCategory().getName()}"></a>
         <div class="card-body bg-light">
 			<!-- 마크다운 -->
             <div class="card-text p-2" style="white-space: pre-line;" th:utext="${@commonUtil.markdown(question.content)}"></div>
 			<!-- 마크다운 -->
+			<!-- 파일 목록 -->
+		    <h5 class="border-bottom my-3 py-2">첨부파일</h5>
+		    <div th:if="${question.questionFiles != null and !question.questionFiles.empty}">
+		        <ul>
+		            <li th:each="file : ${question.questionFiles}">
+		                <a th:href="@{|/question/file/${file.id}|}" th:text="${file.originalFileName}"></a>
+		            </li>
+		        </ul>
+		    </div>
+		    <div th:if="${question.questionFiles == null or question.questionFiles.empty}">
+		        <p>첨부된 파일이 없습니다.</p>
+		    </div>
+			<!-- 파일 목록 -->
             <div class="d-flex justify-content-end">
 				<div th:if="${question.modifyDate != null}" class="badge rounded-pill bg-info text-white">
 	                <div class="mb-2">modified at</div>

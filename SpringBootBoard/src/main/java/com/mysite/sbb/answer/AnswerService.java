@@ -1,6 +1,5 @@
 package com.mysite.sbb.answer;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +31,7 @@ public class AnswerService {
     public Answer create(Question question, String content, SiteUser author) {
         Answer answer = new Answer();
         answer.setContent(content);
-        answer.setCreateDate(LocalDateTime.now());
+//        answer.setCreateDate(LocalDateTime.now());
         answer.setQuestion(question);
         answer.setAuthor(author);
         this.answerRepository.save(answer);
@@ -52,7 +51,7 @@ public class AnswerService {
     // 수정
     public void modify(Answer answer, String content) {
         answer.setContent(content);
-        answer.setModifyDate(LocalDateTime.now());
+//        answer.setModifyDate(LocalDateTime.now());
         this.answerRepository.save(answer);
     }
     

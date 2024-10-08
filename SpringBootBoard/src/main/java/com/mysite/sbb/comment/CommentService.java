@@ -43,7 +43,7 @@ public class CommentService {
         comment.setQuestion(question);
         comment.setAnswer(answer);
         comment.setAuthor(siteUser);
-        comment.setCreateDate(LocalDateTime.now());
+//        comment.setCreateDate(LocalDateTime.now());
         this.commentRepository.save(comment);
         return comment;
     }

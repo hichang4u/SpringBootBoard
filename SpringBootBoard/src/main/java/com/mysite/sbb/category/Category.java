@@ -2,6 +2,7 @@ package com.mysite.sbb.category;
 
 import java.util.List;
 
+import com.mysite.sbb.BaseTimeEntity;
 import com.mysite.sbb.question.Question;
 
 import jakarta.persistence.CascadeType;
@@ -17,7 +18,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Category {
+public class Category extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

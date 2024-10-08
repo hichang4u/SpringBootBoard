@@ -18,7 +18,9 @@ repositories {
 }
 
 dependencies {
+	// Spring Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// Spring Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	// developmentOnly: 해당 라이브러리는 개발 환경에만 적용된다는 의미로, 운영 환경에 배포되는 jar, war 파일에는 이 라이브러리가 포함되지 않는다.
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -40,12 +42,25 @@ dependencies {
     // security 사용
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    // 마크다운 사용
-    implementation 'org.commonmark:commonmark:0.22.0'
+    // 마크다운 사용(https://github.com/commonmark/commonmark-java?tab=readme-ov-file#extensions)
+    implementation 'org.commonmark:commonmark:0.23.0'				 		// 0.23.0 2024-09-16
+    implementation 'org.commonmark:commonmark-ext-gfm-tables:0.23.0' 		// 테이블 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-gfm-strikethrough:0.23.0' // 취소선 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-ins:0.23.0' 				// underline 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-task-list-items:0.23.0' 	// task 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-autolink:0.23.0' 			// autolink 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-footnotes:0.23.0' 		// footnotes 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-heading-anchor:0.23.0' 	// heading 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-yaml-front-matter:0.23.0' // YAML front matter 관련 추가 설정
+    implementation 'org.commonmark:commonmark-ext-image-attributes:0.23.0'  // Image Attributes 관련 추가 설정
+    // OWASP Java HTML Sanitizer
+    implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
     // 메일발송 사용
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     // 스프링 시큐리티와 OAuth 2.0으로 로그인 기능 구현
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    // Log4JDBC 라이브러리
+	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 }
 
 tasks.named('test') {

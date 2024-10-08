@@ -1,6 +1,5 @@
 package com.mysite.sbb.question;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,21 +77,23 @@ public class QuestionService {
     }
     
     // 저장
-    public void create(String subject, String content, SiteUser user, Category category) {
+    public Question create(String subject, String content, SiteUser user, Category category) {
         Question q = new Question();
         q.setSubject(subject);
         q.setContent(content);
-        q.setCreateDate(LocalDateTime.now());
+//        q.setCreateDate(LocalDateTime.now());
         q.setAuthor(user);
         q.setCategory(category);
         this.questionRepository.save(q);
+        
+        return q;
     }
     
     // 수정
     public void modify(Question question, String subject, String content, Category category) {
         question.setSubject(subject);
         question.setContent(content);
-        question.setModifyDate(LocalDateTime.now());
+//        question.setModifyDate(LocalDateTime.now());
         question.setCategory(category);
         this.questionRepository.save(question);
     }

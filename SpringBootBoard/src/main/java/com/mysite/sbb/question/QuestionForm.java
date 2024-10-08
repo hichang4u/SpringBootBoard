@@ -1,5 +1,7 @@
 package com.mysite.sbb.question;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -16,4 +18,8 @@ public class QuestionForm {
     private String content;
     
     private int category;
+    
+    private int code;
+    
+    private MultipartFile[] files;
 }

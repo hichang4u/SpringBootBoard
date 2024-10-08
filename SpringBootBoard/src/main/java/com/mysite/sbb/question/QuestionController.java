@@ -1,10 +1,17 @@
 package com.mysite.sbb.question;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +21,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.answer.AnswerForm;
@@ -40,6 +49,7 @@ public class QuestionController {
 	private final UserService userService;
 	private final CommentService commentService;
 	private final CategoryService categoryService;
+	private final QuestionFileService questionFileService;
 
 	@GetMapping("/list")
     public String list(Model model
@@ -50,7 +60,7 @@ public class QuestionController {
         model.addAttribute("kw", kw);
         List<Category> categoryList = this.categoryService.getAll();
         model.addAttribute("category_list", categoryList);
-        return "question/list";
+        return "question/lists";
     }
     
     @GetMapping(value = "/detail/{id}")
@@ -81,16 +91,31 @@ public class QuestionController {
     }
     
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String questionCreate(@Valid QuestionForm questionForm
     						   , BindingResult bindingResult
-    						   , Principal principal) {
+    						   , Principal principal)  throws IOException {
         if (bindingResult.hasErrors()) {
             return "question/form";
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
         Category category = this.categoryService.getCategoryById(questionForm.getCategory());
-        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser, category);
+        Question question = this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser, category);
+        // 파일 업로드 처리
+        if (questionForm.getFiles() != null) {
+            for (MultipartFile file : questionForm.getFiles()) {
+                if (!file.isEmpty()) {
+                    try {
+                        questionFileService.saveFile(file, question);
+                    } catch (IOException e) {
+                        // Log the error and handle it appropriately
+                        e.printStackTrace();
+                        // You might want to add an error message to the model here
+                    }
+                }
+            }
+        }
+        
         return "redirect:/question/list";
     }
     
@@ -107,6 +132,10 @@ public class QuestionController {
         questionForm.setSubject(question.getSubject());
         questionForm.setContent(question.getContent());
         questionForm.setCategory(question.getCategory().getId().intValue());
+        // 기존 파일 정보를 모델에 추가
+        List<QuestionFile> existingFiles = questionFileService.getFilesByQuestion(question);
+        model.addAttribute("file_list", existingFiles);
+        
         List<Category> categoryList = this.categoryService.getAll();
         model.addAttribute("category_list", categoryList);
         return "question/form";
@@ -117,7 +146,9 @@ public class QuestionController {
     public String questionModify(@Valid QuestionForm questionForm
     						   , BindingResult bindingResult
     						   , Principal principal
-    						   , @PathVariable("id") Integer id) {
+    						   , @PathVariable("id") Integer id
+    						   , @RequestParam(value = "deleteFileIds", required = false) List<Long> deleteFileIds
+    						   , RedirectAttributes redirectAttributes) throws IOException {
         if (bindingResult.hasErrors()) {
             return "question/form";
         }
@@ -127,6 +158,24 @@ public class QuestionController {
         }
         Category category = this.categoryService.getCategoryById(questionForm.getCategory());
         this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent(), category);
+        // 삭제할 파일 처리
+        if (deleteFileIds != null && !deleteFileIds.isEmpty()) {
+            questionFileService.deleteFiles(deleteFileIds);
+        }        
+        // 새 파일 업로드 처리
+        if (questionForm.getFiles() != null) {
+            for (MultipartFile file : questionForm.getFiles()) {
+                if (!file.isEmpty()) {
+                    try {
+                        questionFileService.saveFile(file, question);
+                    } catch (IOException e) {
+                        // Log the error and handle it appropriately
+                        e.printStackTrace();
+                        // You might want to add an error message to the model here
+                    }
+                }
+            }
+        }
         return String.format("redirect:/question/detail/%s", id);
     }
     
@@ -148,5 +197,25 @@ public class QuestionController {
         SiteUser siteUser = this.userService.getUser(principal.getName());
         this.questionService.vote(question, siteUser);
         return String.format("redirect:/question/detail/%s", id);
+    }
+    
+    @GetMapping("/file/{fileId}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") Long fileId) {
+        QuestionFile questionFile = questionFileService.getFile(fileId)
+            .orElseThrow(() -> new RuntimeException("File not found"));
+
+        try {
+            Resource resource = questionFileService.loadFileAsResource(questionFile.getStoredFileName());
+            
+            String encodedFileName = URLEncoder.encode(questionFile.getOriginalFileName(), StandardCharsets.UTF_8.toString())
+                    .replaceAll("\\+", "%20");
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                    .body(resource);
+        } catch (IOException e) {
+            throw new RuntimeException("Error downloading file", e);
+        }
     }
 }

@@ -28,6 +28,8 @@ public class SiteUser {
     
     private String registerId;
     
+    private Gender gender;
+    
     @Builder
     public SiteUser() {
     }
@@ -37,4 +39,11 @@ public class SiteUser {
         this.username = username;
         this.email = email;
     }
+    
+    public enum Gender {
+
+        M, F
+
+    }
 }
+

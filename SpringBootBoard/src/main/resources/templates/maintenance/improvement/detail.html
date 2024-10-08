@@ -1,0 +1,42 @@
+<html layout:decorate="~{maintenance/layout}">
+<div layout:fragment="content" class="container my-3">
+    <!-- 개선사항 -->
+	<h2 class="border-bottom py-2">[[${improvement.subject}]]</h2>
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">[[${improvement.content}]]</div>
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2 text-start">
+                    [[${#temporals.format(improvement.createDate, 'yyyy-MM-dd HH:mm')}]]
+                </div>
+            </div>
+        </div>
+    </div>
+	
+	<!-- 처리 갯수 표시 -->
+    <h5 class="border-bottom my-3 py-2" 
+        th:text="|${#lists.size(improvement.processList)}개의 처리사항이 있습니다.|"></h5>
+
+	<!-- 처리 반복 시작 -->
+    <div class="card my-3" th:each="process : ${improvement.processList}">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">[[${process.content}]]</div>
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2 text-start">
+                    [[${#temporals.format(process.createDate, 'yyyy-MM-dd HH:mm')}]]
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 처리 반복 끝  -->	
+	
+	<!-- 처리 작성 -->
+	<form th:action="@{|/mtn/process/create/${improvement.id}|}" th:object="${processForm}" method="post" class="my-3">
+		<div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
+            <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+        </div>
+	    <textarea th:field="*{content}" rows="10" class="form-control" placeholder="내용을 입력하세요." required></textarea>
+	    <input type="submit" value="처리 등록" class="btn btn-primary my-2">
+	</form>
+</div>
+</html>

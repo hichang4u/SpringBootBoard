@@ -10,33 +10,18 @@
     <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}">
     <!-- sbb CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
-	<!-- font-awesome -->
-	<link rel="stylesheet" type="text/css" th:href="@{/css/all.min.css}">
     <title>유지보수 게시판</title>
 </head>
-<!-- 네비바를 fiexd-top으로 설정했을 때 컨텐츠와 겹치는 문제 방지 -->
-<body class="pt-5 min-vh-100 d-flex flex-column">
-	<header>
-		<!-- Navigation Bar -->
-		<nav th:replace="~{navbar :: navbarFragment}"></nav>
-	</header>
-
-	<div class="container flex-grow-1 p-0">
-		<!-- 기본 템플릿 안에 삽입될 내용 Start -->
-	    <th:block layout:fragment="content"></th:block>
-	    <!-- 기본 템플릿 안에 삽입될 내용 End -->
-	</div>
-
-	<footer>
-		<!-- Footer -->
-		<nav th:replace="~{footer :: footerFragment}"></nav>
-	</footer>
+<body>
+	<!-- 네비게이션바 -->
+	<nav th:replace="~{maintenance/navbar :: navbarFragment}"></nav>
+	<!-- 기본 템플릿 안에 삽입될 내용 Start -->
+    <th:block layout:fragment="content"></th:block>
+    <!-- 기본 템플릿 안에 삽입될 내용 End -->
 	<!-- 마크다운 JS -->
 	<script th:src="@{/js/simplemde.min.js}"></script>
 	<!-- Bootstrap JS -->
 	<script th:src="@{/js/bootstrap.min.js}"></script>
-	<!-- font-awesome -->
-	<script th:src="@{/js/all.min.js}"></script>
 	<!-- 자바스크립트 Start -->
 	<th:block layout:fragment="script"></th:block>
 	<!-- 자바스크립트 End -->

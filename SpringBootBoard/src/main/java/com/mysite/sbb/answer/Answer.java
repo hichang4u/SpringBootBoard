@@ -1,9 +1,9 @@
 package com.mysite.sbb.answer;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import com.mysite.sbb.BaseTimeEntity;
 import com.mysite.sbb.comment.Comment;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Answer {
+public class Answer extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,15 +31,11 @@ public class Answer {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private LocalDateTime createDate; 
-
     @ManyToOne
     private Question question;  
     
     @ManyToOne
     private SiteUser author;
-    
-    private LocalDateTime modifyDate;
     
     @ManyToMany
     Set<SiteUser> voter;

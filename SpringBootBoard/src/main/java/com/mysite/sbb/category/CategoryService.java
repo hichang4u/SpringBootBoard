@@ -7,14 +7,13 @@ import org.springframework.stereotype.Service;
 
 import com.mysite.sbb.DataNotFoundException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
 
     public Category create(String name) {
         Category category = new Category();

@@ -1,9 +1,13 @@
 <html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container">
     <h5 class="my-3 border-bottom pb-2">질문등록</h5>
-	<form th:object="${questionForm}" method="post">
+	<form th:object="${questionForm}" method="post" enctype="multipart/form-data">
 	    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <div class="mb-3">
+            <label for="subject" class="form-label">제목</label>
+            <input type="text" th:field="*{subject}" class="form-control">
+        </div>
 		<div class="mb-3">
             <label for="category" class="form-label">카테고리</label>
             <select th:field="*{category}" class="form-select">
@@ -13,17 +17,44 @@
             </select>
         </div>
         <div class="mb-3">
-            <label for="subject" class="form-label">제목</label>
-            <input type="text" th:field="*{subject}" class="form-control">
-        </div>
-        <div class="mb-3">
             <label for="content" class="form-label">내용</label>
             <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
         </div>
+		
+		<div class="mb-3">
+            <label for="files" class="form-label">첨부파일</label>
+            <input type="file" th:field="*{files}" class="form-control" multiple>
+        </div>
+		<!-- 기존 파일 목록 -->
+		<div class="mb-3">
+            <div class="file-list border rounded p-2">
+                <div th:each="file : ${file_list}" id="filePreview" class="file-item">
+                    <i class="fas fa-file"></i>
+                    <span class="file-name" th:text="${file.originalFileName}"></span>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" th:id="${'deleteFile' + file.id}" name="deleteFileIds" th:value="${file.id}">
+                        <label class="form-check-label" th:for="${'deleteFile' + file.id}">삭제</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!-- 기존 파일 목록 -->
+				
         <input type="submit" value="저장하기" class="btn btn-primary my-2">
     </form>
 </div>
 <script layout:fragment="script" type='text/javascript'>
 const simplemde = new SimpleMDE({element: document.getElementById("content")});
+document.getElementById('files').addEventListener('change', function(event) {
+    var preview = document.getElementById('filePreview');
+    preview.innerHTML = '';
+    for (var i = 0; i < event.target.files.length; i++) {
+        var file = event.target.files[i];
+        var fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = '<i class="fas fa-file"></i><span class="file-name">' + file.name + '</span>';
+        preview.appendChild(fileItem);
+    }
+});
 </script>
 </html>
